@@ -15,4 +15,5 @@ $PY scripts/extract_rosstat.py       # зарплаты и инфляция
 $PY scripts/extract_rosstat_regions.py # гости и номера по регионам
 $PY scripts/check_nf.py              # сверка цифр NF Group
 $PY scripts/build_investigation_html.py # страница report/index.html
+$PY scripts/build_bi_datasets.py     # наборы данных для DataLens
 echo "Готово."
