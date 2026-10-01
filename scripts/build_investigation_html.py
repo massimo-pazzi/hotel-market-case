@@ -11,7 +11,9 @@ report/index.html пишется без <html>/<head>/<body> — их добав
 Запуск:  .venv/bin/python scripts/build_investigation_html.py
 """
 
+import base64
 import csv
+import re
 import io
 import subprocess
 from pathlib import Path
@@ -608,8 +610,105 @@ def chart_quality():
              (n_clean, "чистых таблиц, каждая получена скриптом"),
              (len(checks), "автоматических проверок: суммы, RevPAR = цена × загрузка, сверка выпусков"),
              (n_sql, "SQL-файлов анализа, на которых построены выводы")]
-    return ('<div class="kpis six">' + "".join(
+    tiles_html = ('<div class="kpis six">' + "".join(
         f'<div class="kpi"><div class="kpi-v">{v}</div><div class="kpi-l">{l}</div></div>' for v, l in tiles) + "</div>")
+    # Что нашли проверки: расхождения сгруппированы по смыслу, а не по технической группе
+    bad = [c for c in checks if c["status"] != "ок"]
+    revised = [c for c in bad if "пересмотрено" in c["note"]]
+    balance = [c for c in bad if "ввод 2025 vs" in c["check"]]
+    lists = [c for c in bad if c["group"].startswith("D")]
+    typos = [c for c in bad if c["group"].startswith("B")]
+    assert len(revised) + len(balance) + len(lists) + len(typos) == len(bad), "неучтённое расхождение"
+    adr23 = next(c for c in revised if c["check"].startswith("2023 adr"))
+    adr24 = next(c for c in revised if c["check"].startswith("2024 adr"))
+    bal = next(c for c in balance if "rooms_total" in c["check"])
+    rows = [
+        ("NF Group переписывает прошлые годы в следующем выпуске. Цена номера за 2023 год: "
+         f"{fmt_int(num(adr23['expected']))} ₽ в выпуске за 2023-й и {fmt_int(num(adr23['actual']))} ₽ в выпуске за 2024-й; "
+         f"за 2024 год: {fmt_int(num(adr24['expected']))} → {fmt_int(num(adr24['actual']))} ₽",
+         len(revised), "Динамику считаем только по парам лет из одного выпуска; ряд 2016–2025 — из одного графика S1"),
+        (f"Фонд на конец 2025 года на {fmt_int(-num(bal['diff']))} номеров меньше, чем «конец 2024 + ввод 2025»: "
+         "89 — закрытый «Талион Империал Отель», остальное в отчёте не объяснено",
+         len(balance), "Выбытие номеров в обзорах не показывают: чистый прирост фонда меньше объявленного ввода"),
+        ("Списки открытых апарт-отелей неполные: в 2025 году по списку 469 номеров из 491, в 2024-м — 7 объектов из 13",
+         len(lists), "Ввод берём из сводной таблицы, а не суммой по спискам"),
+        ("Опечатка в динамике ввода за I полугодие 2025 года: −76,6% вместо −78,6%",
+         len(typos), "На выводы не влияет"),
+    ]
+    found = ('<div class="table-wrap"><table class="found"><thead><tr><th>Что нашли</th><th>Проверок</th>'
+             '<th>Как учли в анализе</th></tr></thead><tbody>' +
+             "".join(f"<tr><td>{esc(a)}</td><td>{n}</td><td>{esc(b)}</td></tr>" for a, n, b in rows) +
+             "</tbody></table></div>"
+             f'<p class="chart-note">Остальные {len(checks) - len(bad)} проверок сошлись: суммы частей, '
+             'доход на номер = цена × загрузка, цифры из поисковой выдачи = PDF.</p>')
+    return tiles_html + found
+
+
+# Источники, на которые опирается страница. Названия — короткие, ссылки берутся из
+# data/SOURCES.md; файлы, которые лежат в репозитории (таблицы Росстата), — ссылкой на файл.
+REPO = "https://github.com/massimo-pazzi/hotel-market-case"
+SOURCE_TITLES = [
+    ("S1", "NF Group, «Рынок гостиничной недвижимости Санкт-Петербурга», 2025 год"),
+    ("S2", "NF Group, то же, I полугодие 2025 года"),
+    ("S3", "NF Group, то же, 2024 год"),
+    ("S9", "NF Group, то же, 2023 год"),
+    ("S10", "IBC Real Estate, «Коммерческая недвижимость Санкт-Петербурга. Предварительные итоги I полугодия 2026» (данные Hotel Advisors)"),
+    ("S13", "IBC Real Estate, «Гостиничная недвижимость, II квартал 2026» (данные Hotel Advisors и Росстата)"),
+    ("S14", "IBC Real Estate, «Коммерческая недвижимость Санкт-Петербурга, II квартал 2026»"),
+    ("S11", "Becar Asset Management, итоги I полугодия 2026 года, пресс-релиз"),
+    ("S15", "Росстат, средняя зарплата по видам экономической деятельности, 2017–2025"),
+    ("S16", "Росстат, средняя зарплата по субъектам РФ"),
+    ("S17", "Росстат, индексы потребительских цен по субъектам РФ, 1992–2025"),
+    ("S21", "Росстат, средства размещения: номера и размещённые лица по субъектам РФ, 2002–2025"),
+    ("S18", "ФНС, «Туристический налог» (Санкт-Петербург)"),
+]
+CONTEXT_SOURCES = ["Дубай, избыток номеров 2017–2019", "ОАЭ, война с Ираном 2026 г.", "ОАЭ, меры поддержки 2026 г."]
+
+
+def md_links(cell):
+    return re.findall(r"\[([^\]]+)\]\((https?://[^)\s]+)\)", cell)
+
+
+def chart_sources():
+    reg = {}
+    context = {}
+    for line in open(ROOT / "data/SOURCES.md", encoding="utf-8"):
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if re.fullmatch(r"S\d+", cells[0]) and len(cells) > 2:
+            reg[cells[0]] = cells[1]
+        elif cells[0] in CONTEXT_SOURCES:
+            context[cells[0]] = cells[-1]
+    manifest = {r["source_id"]: r for r in csv.DictReader(open(ROOT / "data/raw_manifest.csv", encoding="utf-8"))}
+    items = []
+    for sid, title in SOURCE_TITLES:
+        m = manifest.get(sid)
+        if m and m["in_repo"] == "да":
+            links = [("файл в репозитории", f"{REPO}/blob/main/data/raw/{m['file']}")]
+        else:
+            links = md_links(reg[sid])
+            assert links, f"нет ссылки у {sid}"
+        a = ", ".join(f'<a href="{u}" target="_blank" rel="noopener">{esc(t)}</a>' for t, u in links)
+        items.append(f"<li><span class=\"sid\">{sid}</span> {esc(title)} — {a}</li>")
+    ctx = []
+    for name in CONTEXT_SOURCES:
+        a = ", ".join(f'<a href="{u}" target="_blank" rel="noopener">{esc(t)}</a>' for t, u in md_links(context[name]))
+        ctx.append(f"<li>{esc(name)} — {a}</li>")
+    rg = re.search(r"\[[^\]]+\]\((https://rg\.ru/[^)]+)\)", open(ROOT / "data/SOURCES.md", encoding="utf-8").read()).group(1)
+    return (f'<p class="sources-h">Повод для исследования:</p><ul class="sources"><li>«Российская газета», 29.09.2026, '
+            f'«После бурного роста турпоток в Петербург перестал увеличиваться» — '
+            f'<a href="{rg}" target="_blank" rel="noopener">rg.ru</a></li></ul>'
+            '<p class="sources-h">Данные:</p>'
+            '<ol class="sources">' + "".join(items) + "</ol>"
+            '<p class="sources-h">Опыт других рынков (шаг 13), только для сравнения:</p>'
+            '<ul class="sources">' + "".join(ctx) + "</ul>"
+            f'<p>Полный реестр — что взято из каждого источника, статус проверки и ограничения: '
+            f'<a href="{REPO}/blob/main/data/SOURCES.md" target="_blank" rel="noopener">data/SOURCES.md</a>.</p>')
+
+
+def author_block():
+    img = base64.b64encode((ROOT / "docs/img/author.jpg").read_bytes()).decode()
+    return (f'<div class="author"><img src="data:image/jpeg;base64,{img}" alt="Максим Поципух" width="64" height="64">'
+            '<span>Максим Поципух</span></div>')
 
 
 CSS = """
@@ -637,7 +736,14 @@ body{background:var(--bg); color:var(--ink); font-family:"Golos Text",system-ui,
 .eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); margin:0 0 14px;}
 h1{font-size:clamp(1.7rem,4.2vw,2.3rem); line-height:1.18; font-weight:700; letter-spacing:-.01em; text-wrap:balance; margin:0 0 16px;}
 h2{font-size:1.28rem; line-height:1.3; font-weight:650; text-wrap:balance; margin:46px 0 12px; padding-top:22px; border-top:1px solid var(--rule);}
-h1 + p em{color:var(--ink-2); font-size:15px;}
+h1 + p em,.author + p em{color:var(--ink-2); font-size:15px;} .author + p a,p a{color:var(--accent);}
+.author{display:flex; align-items:center; gap:12px; margin:4px 0 16px; font-weight:600; font-size:15px;}
+.author img{width:64px; height:64px; border-radius:50%; object-fit:cover; border:1px solid var(--rule);}
+.sources{font-size:14.5px; line-height:1.55; padding-left:1.5em;} .sources li{margin-bottom:6px;}
+.sources a{color:var(--accent); word-break:break-word;} .sid{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12px; color:var(--muted); margin-right:4px;}
+.sources-h{margin:14px 0 6px; font-weight:600; font-size:14.5px;}
+ol.sources{list-style:none; padding-left:0;}
+table.found td:nth-child(2){font-variant-numeric:tabular-nums; text-align:center;}
 p{margin:0 0 14px;} strong{font-weight:620;} hr{display:none;}
 ol,ul{margin:0 0 14px; padding-left:1.3em;}
 code{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:.86em; background:var(--accent-soft); padding:1px 5px; border-radius:3px;}
@@ -704,8 +810,6 @@ DL_EMBEDS = {
     "fo_shares": ("595dvf0vvd9go", "Доля федеральных округов в числе гостей России, 2015–2025, %", 470,
                   "Живой график из DataLens: наведите на линию, чтобы увидеть значение; щелчок по округу в "
                   "легенде скрывает его линию. Росстат (S21)."),
-    "quality": ("484c00avsjqen", "Все 94 автоматические проверки данных NF Group", 520,
-                "Живая таблица из DataLens: щелчок по заголовку столбца сортирует строки, таблица прокручивается."),
 }
 
 
@@ -732,6 +836,7 @@ def main():
         "lost": chart_lost(), "seasons": chart_seasons(), "economy": chart_economy(), "uae": chart_uae(),
         "stress": chart_stress(), "forecast": chart_forecast(), "actions": chart_actions(),
         "mistakes": chart_mistakes(), "quality": chart_quality(),
+        "author": author_block(), "sources": chart_sources(),
     }
     for name, block in charts.items():
         marker = f"<!-- chart:{name} -->"
@@ -748,11 +853,13 @@ def main():
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>{CSS}</style>
 <main class="page">
-<p class="eyebrow">Исследование рынка · Санкт-Петербург · октябрь 2026</p>
+<p class="eyebrow">Портфолио-кейс анализа данных · Максим Поципух · Октябрь 2026</p>
 {html}
 <p class="footer">Наведите курсор на точку или столбик, чтобы увидеть значение. Те же данные — на
 <a href="{DL_DASH}" target="_blank" rel="noopener">дашборде в Yandex DataLens</a>. Данные, скрипты
-извлечения и SQL-запросы — в репозитории проекта; реестр источников — data/SOURCES.md.</p>
+извлечения и SQL-запросы — в <a href="{REPO}" target="_blank" rel="noopener">репозитории проекта</a>.
+Вопросы, гипотезы и проверка выводов — автора; сбор и обработка данных, расчёты и тексты выполнены
+с помощью Claude (Anthropic).</p>
 </main>
 """
     OUT.write_text(page, encoding="utf-8")
