@@ -4,10 +4,9 @@
 (октябрь 2026 года): что произошло с загрузкой и ценами, почему, тенденция ли
 это, что будет в 2027 году и что из этого следует для отельера.
 
-**Страница исследования:** [`docs/index.html`](docs/index.html) — 16 шагов от проверки
-данных до прогноза, каждый вывод с инфографикой. Если для репозитория включён
-GitHub Pages (Settings → Pages → папка `/docs`), страница открывается по ссылке
-вида `https://<аккаунт>.github.io/<репозиторий>/`.
+**Страница исследования:** [massimo-pazzi.github.io/hotel-market-case](https://massimo-pazzi.github.io/hotel-market-case/)
+— 16 шагов от проверки данных до прогноза, каждый вывод с инфографикой
+(исходник — [`docs/index.html`](docs/index.html)).
 **Дашборд в Yandex DataLens:** [https://datalens.yandex/151am5wmftd4k](https://datalens.yandex/151am5wmftd4k) — те же данные, с
 фильтром по федеральным округам; наборы данных и описание — в [`dashboard/`](dashboard/).
 **Краткий текстовый отчёт:** [`report/spb_hotel_market_2027.md`](report/spb_hotel_market_2027.md).
