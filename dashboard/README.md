@@ -3,7 +3,7 @@
 Интерактивная версия исследования: те же данные и расчёты, что на странице
 исследования, собранные в Yandex DataLens.
 
-**Дашборд:** [https://datalens.ru/151am5wmftd4k-gostinichnyy-rynok-peterburga-predel-rosta-cen](https://datalens.ru/151am5wmftd4k-gostinichnyy-rynok-peterburga-predel-rosta-cen) (открыт публично, вход не нужен).
+**Дашборд:** [https://datalens.yandex/151am5wmftd4k](https://datalens.yandex/151am5wmftd4k) (открыт публично, вход не нужен).
 
 Наборы данных — в [`data/`](data/), собираются скриптом
 `scripts/build_bi_datasets.py` из таблиц `data/clean/` теми же запросами, что и

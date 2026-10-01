@@ -680,10 +680,46 @@ th,td{text-align:left; padding:9px 12px 9px 0; border-bottom:1px solid var(--rul
 th{font-weight:600; color:var(--ink-2); font-size:13px;}
 table.actions td:last-child{font-weight:600; font-variant-numeric:tabular-nums;}
 table.mistakes td:first-child{font-weight:600;}
+.dl-link{margin:-10px 0 20px; font-size:13.5px;} .dl-link a,.chart-note a,.footer a{color:var(--accent);}
+.chart.live iframe{display:block; width:100%; border:0; border-radius:4px; background:#fff;}
 .footer{margin-top:40px; padding-top:16px; border-top:1px solid var(--rule); font-size:13.5px; color:var(--muted);}
 @media (max-width:520px){ body{font-size:16px; padding-block:24px 48px;} }
 @media (prefers-reduced-motion:reduce){ *{transition:none!important;} }
 """
+
+
+# Чарты дашборда в Yandex DataLens (публичные, домен datalens.yandex разрешает встраивание).
+# Под графиком страницы — ссылка на чарт с теми же данными; для двух чартов — живая вставка,
+# там, где интерактивность добавляет то, чего нет на картинке.
+DL = "https://datalens.yandex/"
+DL_DASH = DL + "151am5wmftd4k"
+DL_LINKS = {
+    "supply_demand": "x1x3xothodp0g", "revpar_monthly": "w0w2a96ebvaef", "check_2026": "lplsheivjvz44",
+    "cities": "y2y507iax19mh", "msk_spb": "lplsheivjvz44", "wages": "ptpvxitqq1rs8",
+    "fo_shares": "595dvf0vvd9go", "tension": "y2y6j3qnjstqh", "lost": "7b7eq0mrb780q",
+    "seasons": "2629p0en9uael", "economy": "lplsheivjvz44", "stress": "x1x47zimoy68g",
+    "forecast": "gkgnml5xclpyz", "quality": "484c00avsjqen",
+}
+DL_EMBEDS = {
+    "fo_shares": ("595dvf0vvd9go", "Доля федеральных округов в числе гостей России, 2015–2025, %", 470,
+                  "Живой график из DataLens: наведите на линию, чтобы увидеть значение; щелчок по округу в "
+                  "легенде скрывает его линию. Росстат (S21)."),
+    "quality": ("484c00avsjqen", "Все 94 автоматические проверки данных NF Group", 520,
+                "Живая таблица из DataLens: щелчок по заголовку столбца сортирует строки, таблица прокручивается."),
+}
+
+
+def dl_link(chart_id):
+    return (f'<p class="dl-link"><a href="{DL}{chart_id}" target="_blank" rel="noopener">'
+            f'Открыть интерактивно в DataLens ↗</a></p>')
+
+
+def dl_embed(chart_id, title, height, note):
+    src = f"{DL}{chart_id}?_embedded=1&_no_controls=1"
+    return (f'<figure class="chart live"><figcaption class="chart-title">{title}</figcaption>'
+            f'<iframe src="{src}" title="{esc(title)}" loading="lazy" style="height:{height}px"></iframe>'
+            f'<p class="chart-note">{note} Если не загрузилось — '
+            f'<a href="{DL}{chart_id}" target="_blank" rel="noopener">откройте его в DataLens</a>.</p></figure>')
 
 
 def main():
@@ -700,6 +736,10 @@ def main():
     for name, block in charts.items():
         marker = f"<!-- chart:{name} -->"
         assert marker in html, f"нет места для графика {name}"
+        if name in DL_EMBEDS:
+            block += dl_embed(*DL_EMBEDS[name])
+        elif name in DL_LINKS:
+            block += dl_link(DL_LINKS[name])
         html = html.replace(marker, block)
     html = html.replace("<table>", '<div class="table-wrap"><table>').replace("</table>\n", "</table></div>\n")
     page = f"""<title>Гостиничный рынок Петербурга</title>
@@ -710,8 +750,9 @@ def main():
 <main class="page">
 <p class="eyebrow">Исследование рынка · Санкт-Петербург · октябрь 2026</p>
 {html}
-<p class="footer">Наведите курсор на точку или столбик, чтобы увидеть значение. Данные, скрипты извлечения и
-SQL-запросы — в репозитории проекта; реестр источников — data/SOURCES.md.</p>
+<p class="footer">Наведите курсор на точку или столбик, чтобы увидеть значение. Те же данные — на
+<a href="{DL_DASH}" target="_blank" rel="noopener">дашборде в Yandex DataLens</a>. Данные, скрипты
+извлечения и SQL-запросы — в репозитории проекта; реестр источников — data/SOURCES.md.</p>
 </main>
 """
     OUT.write_text(page, encoding="utf-8")

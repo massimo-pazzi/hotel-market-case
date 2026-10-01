@@ -8,7 +8,7 @@
 данных до прогноза, каждый вывод с инфографикой. Если для репозитория включён
 GitHub Pages (Settings → Pages → папка `/docs`), страница открывается по ссылке
 вида `https://<аккаунт>.github.io/<репозиторий>/`.
-**Дашборд в Yandex DataLens:** [https://datalens.ru/151am5wmftd4k-gostinichnyy-rynok-peterburga-predel-rosta-cen](https://datalens.ru/151am5wmftd4k-gostinichnyy-rynok-peterburga-predel-rosta-cen) — те же данные, с
+**Дашборд в Yandex DataLens:** [https://datalens.yandex/151am5wmftd4k](https://datalens.yandex/151am5wmftd4k) — те же данные, с
 фильтром по федеральным округам; наборы данных и описание — в [`dashboard/`](dashboard/).
 **Краткий текстовый отчёт:** [`report/spb_hotel_market_2027.md`](report/spb_hotel_market_2027.md).
 
