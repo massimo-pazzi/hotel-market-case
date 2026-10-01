@@ -1,0 +1,17 @@
+case,metric,period,value,unit,source,independent
+Дубай 2019,Предложение номеров,январь 2019 г/г,9.3,%,STR via HTrends https://www.htrends.com/trends-detail-sid-103990.html,да
+Дубай 2019,Спрос (проданные номера),январь 2019 г/г,3.9,%,STR via HTrends https://www.htrends.com/trends-detail-sid-103990.html,да
+Дубай 2019,Средняя цена (ADR),январь 2019 г/г,-11.4,%,STR via HTrends https://www.htrends.com/trends-detail-sid-103990.html,да
+Дубай 2019,Доход на номер (RevPAR),январь 2019 г/г,-15.8,%,STR via HTrends https://www.htrends.com/trends-detail-sid-103990.html,да
+ОАЭ 2026,Загрузка отелей Дубая,январь–февраль 2026,84.8,%,HVS/CoStar https://www.hvs.com/article/10449-shock-divergence-and-recovery-the-impact-of-the-2026-usiran-conflict-on-gcc-hospitality,да
+ОАЭ 2026,Загрузка отелей Дубая,неделя до 14.03.2026,22.8,%,HVS/CoStar https://www.hvs.com/article/10449-shock-divergence-and-recovery-the-impact-of-the-2026-usiran-conflict-on-gcc-hospitality,да
+ОАЭ 2026,Загрузка отелей Дубая,март 2026,36,%,DET via The National https://www.thenationalnews.com/business/economy/2026/08/11/abu-dhabi-top-uae-occupancy-rates-in-first-half-amid-war-fallout/,нет
+ОАЭ 2026,Загрузка отелей Дубая,июнь 2026,51.6,%,JLL via The National https://www.thenationalnews.com/business/economy/2026/08/11/abu-dhabi-top-uae-occupancy-rates-in-first-half-amid-war-fallout/,да
+ОАЭ 2026,Загрузка отелей Дубая,август 2026,66,%,DET via The National https://www.thenationalnews.com/news/uae/2026/09/13/dubai-says-tourism-recovery-has-begun-with-nearly-900000-visitors-in-august/,нет
+ОАЭ 2026,Заявление DET о загрузке в праздники,июнь 2026,77,%,DET via Gulf News (по пересказу; противоречит JLL),нет
+ОАЭ 2026,Средняя цена (ADR) Дубая,I пол. 2026 г/г,-7,%,JLL via The National,да
+ОАЭ 2026,Доход на номер (RevPAR) Дубая,I пол. 2026 г/г,-35.2,%,CBRE/CoStar via Skift https://skift.com/2026/08/11/uaes-hotel-divide-abu-dhabi-holds-up-while-dubai-sinks/,да
+ОАЭ 2026,Доход на номер (RevPAR) Абу-Даби,I пол. 2026 г/г,-20.3,%,CBRE/CoStar via Skift https://skift.com/2026/08/11/uaes-hotel-divide-abu-dhabi-holds-up-while-dubai-sinks/,да
+Петербург 2026,Рост цены (Vertical Hotels),I пол. 2025,15,%,Vertical Hotels в пресс-релизе Becar (S11),нет
+Петербург 2026,Рост цены (Vertical Hotels),I пол. 2026,8,%,Vertical Hotels в пресс-релизе Becar (S11),нет
+Петербург 2026,Изменение загрузки (Becar),I пол. 2026 г/г,-2,п.п.,Becar (S11),нет

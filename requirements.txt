@@ -1,0 +1,5 @@
+# Python 3.12+; DuckDB CLI 1.5 ставится отдельно (brew install duckdb)
+pdfplumber==0.11.10
+pdfminer.six==20260107
+openpyxl==3.1.5
+Markdown==3.11

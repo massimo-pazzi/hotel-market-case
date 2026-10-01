@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+# Отчёты NF Group и IBC не выкладываем — скачиваются scripts/download_raw.py
+data/raw/*.pdf
