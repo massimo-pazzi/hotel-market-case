@@ -147,6 +147,10 @@ FROM fc WHERE scenario = 'базовый';
 --        пересказе СМИ; на gov.spb.ru цифра не найдена — НЕ СВЕРЕНО).
 --   [B2] Допущение: корпоративные поездки −10% из-за налогового давления на бизнес
 --        (для сравнения: по России деловых поездок в 2025 г. −8%, Forbes — не сверено).
+--   [B3] Жёсткий вариант: корпоративные поездки −20%. Основание — ужесточение налогового
+--        администрирования 2026 г.: массовая ликвидация фирм «бумажного НДС» (Клерк, 07.09.2026),
+--        выездные проверки могут охватывать текущий год (п. 4 ст. 89 НК РФ). Масштаб влияния
+--        на командировки в открытых данных не измерен — это допущение, а не оценка.
 --   [T1] Туристический налог СПб (закон 738-158, nalog.gov.ru): 2026 — 1% (окт–март)
 --        и 2% (апр–сен); 2027 — 1,5% и 3%. В стресс-сценарии отели не могут
 --        переложить прирост налога на гостей и платят его из выручки.
@@ -157,7 +161,9 @@ CREATE OR REPLACE TEMP TABLE stress AS
 SELECT
     0.24 * 0.94 * 0.10 * (1 - 0.30)  AS auto_loss,      -- доля потока, которая не приедет
     0.11 * 0.10                      AS corp_loss,
-    0.20 * 0.10                      AS corp_loss_high;
+    0.20 * 0.10                      AS corp_loss_high,
+    0.11 * 0.20                      AS corp_loss_20,       -- [B3]
+    0.20 * 0.20                      AS corp_loss_20_high;  -- [B3] при доле деловых гостей 20%
 
 -- Средняя прибавка турналога в 2027 г., взвешенная по выручке месяцев 2025 г.
 CREATE OR REPLACE TEMP VIEW tax_add AS
@@ -189,6 +195,10 @@ WITH b AS (
     SELECT 'стресс: всё + налог',      auto_loss + corp_loss, (SELECT tax_increment FROM tax_add) FROM stress
     UNION ALL
     SELECT 'стресс: всё + налог, доля бизнеса 20%', auto_loss + corp_loss_high, (SELECT tax_increment FROM tax_add) FROM stress
+    UNION ALL
+    SELECT 'стресс: всё + налог, командировки −20%', auto_loss + corp_loss_20, (SELECT tax_increment FROM tax_add) FROM stress
+    UNION ALL
+    SELECT 'стресс: всё + налог, командировки −20%, доля бизнеса 20%', auto_loss + corp_loss_20_high, (SELECT tax_increment FROM tax_add) FROM stress
 )
 SELECT
     v.variant,
