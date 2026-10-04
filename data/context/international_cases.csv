@@ -15,3 +15,9 @@ case,metric,period,value,unit,source,independent
 Петербург 2026,Рост цены (Vertical Hotels),I пол. 2025,15,%,Vertical Hotels в пресс-релизе Becar (S11),нет
 Петербург 2026,Рост цены (Vertical Hotels),I пол. 2026,8,%,Vertical Hotels в пресс-релизе Becar (S11),нет
 Петербург 2026,Изменение загрузки (Becar),I пол. 2026 г/г,-2,п.п.,Becar (S11),нет
+Калининград 2026,Перелёт из Москвы туда и обратно на человека,2026,35–40,тыс. ₽,"Hotel Advisors, С. Данильченко, 15.09.2026 (S22) https://hoteladvisors.ru/blog-2/zagruzka-snizhaetsya-rost-tarifa-zamedlyaetsya-chto-proiskhodit-s-gostinichnym-rynkom-rossii/",да
+Калининград 2026,Снижение показателей сильных новых объектов к 2024 году,2026 к 2024,30–40 (местами 50),%,"Hotel Advisors, С. Данильченко, 15.09.2026 (S22) https://hoteladvisors.ru/blog-2/zagruzka-snizhaetsya-rost-tarifa-zamedlyaetsya-chto-proiskhodit-s-gostinichnym-rynkom-rossii/",да
+Россия 2026–2027,Загрузка с начала 2026 года,2026 г/г,≈ −6,%,"Hotel Advisors, С. Данильченко, 15.09.2026 (S22) https://hoteladvisors.ru/blog-2/zagruzka-snizhaetsya-rost-tarifa-zamedlyaetsya-chto-proiskhodit-s-gostinichnym-rynkom-rossii/",да
+Россия 2026–2027,Доход на номер,с февраля 2026,двузначное снижение,,"Hotel Advisors, С. Данильченко, 15.09.2026 (S22) https://hoteladvisors.ru/blog-2/zagruzka-snizhaetsya-rost-tarifa-zamedlyaetsya-chto-proiskhodit-s-gostinichnym-rynkom-rossii/",да
+Россия 2026–2027,Загрузка в 2027 году,2027,"снижение продолжится, но медленнее",,"Hotel Advisors, С. Данильченко, 15.09.2026 (S22) https://hoteladvisors.ru/blog-2/zagruzka-snizhaetsya-rost-tarifa-zamedlyaetsya-chto-proiskhodit-s-gostinichnym-rynkom-rossii/",да
+Россия 2026–2027,Средний тариф в 2027 году,2027,стабилизация или небольшой рост,,"Hotel Advisors, С. Данильченко, 15.09.2026 (S22) https://hoteladvisors.ru/blog-2/zagruzka-snizhaetsya-rost-tarifa-zamedlyaetsya-chto-proiskhodit-s-gostinichnym-rynkom-rossii/",да
