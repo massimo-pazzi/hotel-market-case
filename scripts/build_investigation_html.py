@@ -187,29 +187,6 @@ def hbars(rows, lo, hi, step, suf="", label_w=210, row_h=22, top=10, value_fmt=N
 
 
 # ======================= графики =======================
-def kpi_tiles():
-    idx = q("""WITH f AS (SELECT year, SUM(start_rooms_est + intake_label / 2.0) AS rooms
-                          FROM supply_chart WHERE is_forecast = 0 GROUP BY year)
-               SELECT f.year, f.rooms, t.total_mln FROM f JOIN tourist_flow t USING (year)
-               WHERE f.year IN (2019, 2025) ORDER BY f.year""")
-    rooms_g = (num(idx[1]["rooms"]) / num(idx[0]["rooms"]) - 1) * 100
-    tour_g = (num(idx[1]["total_mln"]) / num(idx[0]["total_mln"]) - 1) * 100
-    h2 = q("""SELECT AVG(a.occupancy_label - b.occupancy_label) AS d FROM monthly_chart a
-              JOIN monthly_chart b ON b.month = a.month AND b.year = 2024
-              WHERE a.year = 2025 AND a.month >= 7""")[0]["d"]
-    fc = {r["scenario"].strip('"'): r for r in sql_file_table("sql/analysis/forecast_2027.sql", "scenario,fund_2026")}
-    checks = list(csv.DictReader(open(ROOT / "data/clean/nf_checks.csv", encoding="utf-8")))
-    bad = sum(1 for c in checks if c["status"] != "ок")
-    tiles = [
-        (f"+{fmt(rooms_g, 0)}% / +{fmt(tour_g, 0)}%", "номеров и туристов в Петербурге с 2019 года"),
-        (f"{fmt(num(h2), 1)} п. п.", "загрузка во II полугодии 2025 года к 2024-му"),
-        (f"{fmt(num(fc['базовый']['occ_2027']), 1)}%", "загрузка в 2027 году, базовый сценарий (2025: 63,7%)"),
-        (f"{len(checks)}", f"автоматических проверок данных; найдено расхождений: {bad}"),
-    ]
-    return '<div class="kpis">' + "".join(
-        f'<div class="kpi"><div class="kpi-v">{v}</div><div class="kpi-l">{l}</div></div>' for v, l in tiles) + "</div>"
-
-
 def chart_revisions():
     ind = q("""SELECT source_id, period, value FROM indicators
                WHERE metric = 'adr' AND period IN ('2023', '2024') ORDER BY period, source_id""")
@@ -829,7 +806,7 @@ def dl_embed(chart_id, title, height, note):
 def main():
     html = markdown.markdown(MD.read_text(encoding="utf-8"), extensions=["tables"])
     charts = {
-        "kpi": kpi_tiles(), "revisions": chart_revisions(), "calibration": chart_calibration(),
+        "revisions": chart_revisions(), "calibration": chart_calibration(),
         "supply_demand": chart_supply_demand(), "revpar_monthly": chart_revpar_monthly(),
         "check_2026": chart_check_2026(), "cities": chart_cities(), "msk_spb": chart_msk_spb(),
         "wages": chart_wages(), "fo_shares": chart_fo_shares(), "tension": chart_tension(),
