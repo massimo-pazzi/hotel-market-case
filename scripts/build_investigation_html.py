@@ -725,7 +725,9 @@ def chart_sources():
 def author_block():
     img = base64.b64encode((ROOT / "docs/img/author.jpg").read_bytes()).decode()
     return (f'<div class="author"><img src="data:image/jpeg;base64,{img}" alt="Максим Поципух" width="64" height="64">'
-            '<span>Максим Поципух</span></div>')
+            '<span class="author-txt"><span>Максим Поципух</span><span class="author-links">'
+            '<a href="https://t.me/maxim_potsipukh" target="_blank" rel="noopener">Telegram</a> · '
+            '<a href="https://max.ru/u/f9LHodD0cOI-rqGbPaCc2EshAXaEgw4ABwO8e2-ng4zK-otGeBnO04IzH5g" target="_blank" rel="noopener">Max</a></span></span></div>')
 
 
 CSS = """
@@ -759,6 +761,7 @@ table.compare-t td:first-child,table.next td:first-child{font-weight:600;}
 h1 + p em,.author + p em{color:var(--ink-2); font-size:15px;} .author + p a,p a{color:var(--accent);}
 .author{display:flex; align-items:center; gap:12px; margin:4px 0 16px; font-weight:600; font-size:15px;}
 .author img{width:64px; height:64px; border-radius:50%; object-fit:cover; border:1px solid var(--rule);}
+.author-txt{display:flex; flex-direction:column; gap:2px;} .author-links{font-weight:400; font-size:13.5px; color:var(--muted);} .author-links a{color:var(--accent);}
 .sources{font-size:14.5px; line-height:1.55; padding-left:1.5em;} .sources li{margin-bottom:6px;}
 .sources a{color:var(--accent); word-break:break-word;} .sid{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12px; color:var(--muted); margin-right:4px;}
 .sources-h{margin:14px 0 6px; font-weight:600; font-size:14.5px;}
