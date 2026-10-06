@@ -848,6 +848,28 @@ def dl_embed(chart_id, title, height, note):
             f'<a href="{DL}{chart_id}" target="_blank" rel="noopener">откройте его в DataLens</a>.</p></figure>')
 
 
+
+# Блок «Другие кейсы автора» — одинаковый во всех кейсах портфолио, ставится над источниками.
+OTHER_CASES = [
+    ("hotel-market-case", "Анализ рынка", "Рост цен в отелях Петербурга перестал окупаться"),
+    ("housing-digital-twin-case", "Новый продукт", "Цифровой двойник жилого фонда Москвы: от аварийного ремонта к прогнозу поломок"),
+    ("b2b-value-case", "Обоснование проекта", "Как доказать окупаемость ИИ-проекта, не зная маржи заказчика"),
+    ("fastfood-assistant-case", "Продукт с ИИ", "ИИ-ассистент для федеральной сети быстрого питания: как спроектировать продукт не имея данных заказчика"),
+]
+
+
+def other_cases(current):
+    tiles = "".join(
+        f'<a class="oc-tile" href="https://massimo-pazzi.github.io/{slug}/"><span class="oc-tag">{tag}</span>'
+        f'<span class="oc-title">{title}</span><span class="oc-go">Открыть кейс →</span></a>'
+        for slug, tag, title in OTHER_CASES if slug != current)
+    style = ("<style>.oc-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin:12px 0 8px;}"
+             ".oc-tile{display:flex; flex-direction:column; gap:6px; padding:14px 16px; background:var(--surface); border:1px solid var(--rule);"
+             " border-radius:6px; text-decoration:none; color:inherit;} .oc-tile:hover{border-color:var(--accent);}"
+             ".oc-tag{font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:var(--accent);}"
+             ".oc-title{font-weight:600; font-size:15px; line-height:1.35;} .oc-go{margin-top:auto; font-size:13px; color:var(--accent);}</style>")
+    return f'{style}<h2>Другие кейсы автора</h2><div class="oc-grid">{tiles}</div>\n'
+
 def main():
     html = markdown.markdown(MD.read_text(encoding="utf-8"), extensions=["tables"])
     charts = {
@@ -880,6 +902,7 @@ def main():
 {html}
 </main>
 """
+    page = page.replace("<h2>Источники</h2>", other_cases("hotel-market-case") + "<h2>Источники</h2>", 1)
     OUT.write_text(page, encoding="utf-8")
     # Та же страница как самостоятельный HTML-файл для GitHub Pages (папка docs/)
     docs = ROOT / "docs" / "index.html"
